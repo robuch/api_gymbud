@@ -26,7 +26,8 @@ class RegisterController extends Controller
 
             return response()->json([
                 'token' => $token,
-                'user' => $user->only(['id', 'name', 'email',])
+                'user' => $user->only(['id', 'name', 'email',]),
+                201
             ]);
         }
     }
