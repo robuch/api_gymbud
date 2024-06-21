@@ -30,10 +30,13 @@ class LoginController extends Controller
         $user = auth()->user();
 
         // Create a token for the user and return it as a JSON response
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Create a token for the user and return it as a JSON response
         return response()->json([
             'message' => 'Login successful',
             'user' => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
-            'token' => $user->createToken('gym_api')->plainTextToken,
+            'token' => $token,
             200
         ]);
     }
