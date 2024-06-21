@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-
+use App\Http\Resources\CategoryResource;
 
 class ClassesResource extends JsonResource
 {
@@ -37,7 +37,11 @@ class ClassesResource extends JsonResource
             'capacity' => $this->capacity,
             'location' => $this->location,
             'instructor_id' => $this->instructor_id,
+            'type_id' => $this->type_id,
+            'category_id' => $this->category_id,
+            'category' => new CategoryResource($this->whenLoaded('category')),
             'status' => $this->status
+
         ];
     }
 }

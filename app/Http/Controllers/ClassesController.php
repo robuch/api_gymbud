@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ClassesCollection;
 use App\Models\Classes;
 use Illuminate\Http\Request;
 use App\Http\Resources\ClassesResource;
@@ -21,11 +22,10 @@ class ClassesController extends Controller
      */
     public function index()
     {
-        $class = Classes::paginate(5);
+        $class = Classes::with('category')->paginate(5);
 
-        //return response()->json(['data' => ClassesResource::collection($class), 200, 'Success']);
-        return ClassesResource::collection($class);
-        //return new ClassesResource(true, 'List of classes', $class);
+        return response()->json(['data' => new ClassesCollection($class), 200, 'message' => 'Success']);
+       // return ClassesResource::collection($class);
     }
 
     /**
@@ -36,17 +36,17 @@ class ClassesController extends Controller
         //Validate the request data
         $validator = Validator::make($request->all(), [
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'name' =>   'required',
-            'description' => 'required',
-            'date' => 'date_format:Y/m/d|after:today|required',
-            'start_time' => 'date_format:H:i|required',
-            'end_time' => 'date_format:H:i|after:start_time|required',
-            'capacity' => 'required',
-            'price' => 'required',
-            'location' => 'required',
-            'instructor_id' => 'required',
-            'type_id' => 'required',
-            'category_id' => 'required',
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'date' => 'required|date_format:Y/m/d|after_or_equal:today',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'capacity' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'location' => 'required|string|max:255',
+            'instructor_id' => 'required|exists:instructors,id',
+            'type_id' => 'required|exists:types,id',
+            'category_id' => 'required|exists:categories,id',
         ]);
 
         //if validation fails
@@ -95,6 +95,7 @@ class ClassesController extends Controller
                 'status' => $request->status,
             ]);
 
+            //return response
             return  response()->json([
                 'message' => 'Class created successfully',
                 'data' => new ClassesResource($class)],
@@ -127,20 +128,19 @@ class ClassesController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validator = Validator::make($request->all(),
-            [
-                'name' =>   'required',
-                'description' => 'required',
-                'date' => 'date_format:Y/m/d|after:today|required',
-                'start_time' => 'date_format:H:i|required',
-                'end_time' => 'date_format:H:i|after:start_time|required',
-                'capacity' => 'required',
-                'price' => 'required',
-                'location' => 'required',
-                'instructor_id' => 'required',
-                'type_id' => 'required',
-                'category_id' => 'required',
-            ]);
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'description' => 'required|string',
+            'date' => 'required|date_format:Y/m/d|after:today',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'capacity' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'location' => 'required|string',
+            'instructor_id' => 'required|integer|exists:instructors,id',
+            'type_id' => 'required|integer|exists:types,id',
+            'category_id' => 'required|integer|exists:categories,id',
+        ]);
 
         //if validation fails
         if ($validator->fails()) {
@@ -247,3 +247,4 @@ class ClassesController extends Controller
         }
     }
 }
+

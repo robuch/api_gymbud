@@ -13,18 +13,21 @@ class RegisterController extends Controller
      */
     public function __invoke(Request $request)
     { {
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => bcrypt($request->password),
-                'role_id' => $request->role_id,
-                'phone' => $request->phone,
-                'gender' => $request->gender,
+            $request->validate([
+                'name' => 'required|string',
+                'email' => 'required|email|unique:users',
+                'password' => 'required|string',
+                'role_id' => 'required|exists:roles,id',
+                'phone' => 'required|string',
+                'gender' => 'required|integer|between:1,2',
             ]);
+
+            $user = User::create($request->all());
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
+                'message' => 'User created successfully',
                 'token' => $token,
                 'user' => $user->only(['id', 'name', 'email',]),
                 201
